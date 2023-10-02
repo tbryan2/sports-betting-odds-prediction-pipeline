@@ -1,21 +1,15 @@
-import numpy as np
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense
+import numpy as np
 
-# Create a simple model
-model = Sequential([
-    Dense(5, input_shape=(5,), activation='relu'),
-    Dense(1, activation='sigmoid')
-])
+# Initialize a Sequential model
+model = Sequential()
 
-model.compile(optimizer='adam', loss='binary_crossentropy')
+# Add a Dense layer with 2 output units
+model.add(Dense(2, input_dim=1))
 
-# Generate some random data
-X = np.random.rand(100, 5)
-y = np.random.randint(0, 2, 100)
-
-# Fit the model
-model.fit(X, y, epochs=3)
+# Compile the model
+model.compile(optimizer='adam', loss='mse')
 
 # Save the model
 model.save('models/dummy_model.h5')

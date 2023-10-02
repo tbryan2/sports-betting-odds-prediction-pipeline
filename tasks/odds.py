@@ -3,7 +3,7 @@ import pandas as pd
 import requests
 
 
-def get_odds(sport, api_key, regions, bookmakers, odds_format):
+def get_odds(sport, api_key, regions, bookmakers, odds_format, csv_save_path):
     '''
     Pull latest odds from The Odds API,
     by default this pulls h2h odds assuming that it's Tuesday
@@ -61,4 +61,4 @@ def get_odds(sport, api_key, regions, bookmakers, odds_format):
     grouped_df = odds_df.groupby(['commence_time', 'home_team', 'away_team']).apply(
         aggregate_rows).reset_index(drop=True)
 
-    return grouped_df
+    grouped_df.to_csv(csv_save_path, index=False)

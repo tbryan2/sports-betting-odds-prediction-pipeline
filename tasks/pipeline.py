@@ -4,6 +4,7 @@ from datetime import datetime
 import emails
 
 from odds import get_odds
+from predictOdds import predict_odds
 from sesemail import send_email
 from keys import SES_HOST_ADDRESS, SES_USER_ID, SES_PASSWORD, ODDS_API_KEY
 
@@ -15,22 +16,23 @@ with DAG("h2h_pipeline", # DAG id
     t1 = PythonOperator(
         task_id="get_odds",
         python_callable=get_odds,
-        do_xcom_push=False,  # Disable XCom push
         op_kwargs={
             "sport" : "americanfootball_nfl",
             "api_key" : ODDS_API_KEY,
             "regions"  : "us",
             "bookmakers" : "fanduel",
-            "odds_format" : "american"
+            "odds_format" : "american",
+            "csv_save_path" : "Users/timothybryan/airflow/dags/data/odds.csv"
         }
     )
 
     t2 = PythonOperator(
-        task_id="predict",
-        python_callable=predict,
+        task_id="predict_odds",
+        python_callable=predict_odds,
         op_kwargs={
-            "odds_path" : "data/odds.csv",
-            "model_path" : "models/dummy_model.h5"
+            "odds_path": "Users/timothybryan/airflow/dags/data/odds.csv",
+            "model_path" : "Users/timothybryan/airflow/dags/models/dummy_model.h5",
+            "prediction_path": "Users/timothybryan/airflow/dags/data/predictions.csv"
         }
     )
 
@@ -38,8 +40,9 @@ with DAG("h2h_pipeline", # DAG id
         task_id="send_email",
         python_callable=send_email,
         op_kwargs={
-            "html" : "<p>Testing email</p>",
-            "subject" : "Odds update",
+            "prediction_path": "Users/timothybryan/airflow/dags/data/predictions.csv",
+            "body" : "<p>Here are my predictions:</p>",
+            "subject" : "NFL Head-to-Head Predictions",
             "mail_from" : "timsfootballs@gmail.com",
             "mail_to" : "timbryan0315@gmail.com",
             "host" : SES_HOST_ADDRESS,
@@ -48,4 +51,4 @@ with DAG("h2h_pipeline", # DAG id
         }
     )
 
-    t1 >> t3
+    t1 >> t2 >> t3
