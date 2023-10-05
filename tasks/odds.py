@@ -3,7 +3,7 @@ import pandas as pd
 import requests
 
 
-def get_odds(sport, api_key, regions, bookmakers, odds_format, csv_save_path):
+def get_odds(sport, regions, bookmakers, odds_format, csv_save_path, **kwargs):
     '''
     Pull latest odds from The Odds API,
     by default this pulls h2h odds assuming that it's Tuesday
@@ -18,6 +18,9 @@ def get_odds(sport, api_key, regions, bookmakers, odds_format, csv_save_path):
 
     commence_time_from = next_thursday.strftime('%Y-%m-%dT%H:%M:%S') + 'Z'
     commence_time_to = next_monday.strftime('%Y-%m-%dT%H:%M:%S') + 'Z'
+
+    secrets = kwargs['ti'].xcom_pull(task_ids='get_secrets')
+    api_key = secrets['ODDS_API_KEY']
 
     url = f"https://api.the-odds-api.com/v4/sports/{sport}/odds/?apiKey={api_key}&regions={regions}&bookmakers={bookmakers}&oddsFormat={odds_format}&commenceTimeFrom={commence_time_from}&commenceTimeTo={commence_time_to}"
 
