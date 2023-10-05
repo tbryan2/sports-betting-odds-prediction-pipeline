@@ -1,3 +1,6 @@
 pandas
 requests
+emails
+python-dotenv
+json
 
