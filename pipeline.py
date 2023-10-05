@@ -3,11 +3,11 @@ from airflow.operators.python import PythonOperator, BranchPythonOperator
 from datetime import datetime
 import emails
 
-from getSecrets import get_secrets
+from getSecrets import SecretsManager
 from odds import get_odds
+from downloadS3Model import download_model_from_s3
 from predictOdds import predict_odds
 from sesEmail import send_email
-from keys import SES_HOST_ADDRESS, SES_USER_ID, SES_PASSWORD, ODDS_API_KEY
 
 with DAG("h2h_pipeline",
     start_date=datetime(2023, 9, 29),
@@ -16,7 +16,8 @@ with DAG("h2h_pipeline",
 
     t0a = PythonOperator(
         task_id='get_secrets',
-        python_callable=get_secrets,
+        python_callable=SecretsManager().get_secrets,
+        provide_context=True,
     )
 
     t1 = PythonOperator(
@@ -24,26 +25,32 @@ with DAG("h2h_pipeline",
         python_callable=get_odds,
         provide_context=True,
         op_kwargs={
-            "sport" : "americanfootball_nfl",
-            "api_key" : ODDS_API_KEY,
-            "regions"  : "us",
-            "bookmakers" : "fanduel",
-            "odds_format" : "american",
-            "csv_save_path" : "Users/timothybryan/airflow/dags/data/odds.csv"
+            "sport": "americanfootball_nfl",
+            "regions": "us",
+            "bookmakers": "fanduel",
+            "odds_format": "american"
         }
     )
 
     t2 = PythonOperator(
-        task_id="predict_odds",
-        python_callable=predict_odds,
+        task_id="download_model_from_s3",
+        python_callable=download_model_from_s3,
         op_kwargs={
-            "odds_path": "Users/timothybryan/airflow/dags/data/odds.csv",
-            "model_path" : "Users/timothybryan/airflow/dags/models/dummy_model.h5",
-            "prediction_path": "Users/timothybryan/airflow/dags/data/predictions.csv"
+            "bucket_name": "sportsbettingoddspredictionpipeline",
+            "model_key": "models/dummy_model.h5",
+            "local_model_path": "tmp/models/dummy_model.h5"
         }
     )
 
     t3 = PythonOperator(
+        task_id="predict_odds",
+        python_callable=predict_odds,
+        op_kwargs={
+            "model_path" : "tmp/models/dummy_model.h5",
+        }
+    )
+
+    t4 = PythonOperator(
         task_id="send_email",
         python_callable=send_email,
         provide_context=True,
@@ -56,4 +63,4 @@ with DAG("h2h_pipeline",
         }
     )
 
-    t0a >> t1 >> t2 >> t3
+    t0a >> t1 >> t2 >> t3 >> t4

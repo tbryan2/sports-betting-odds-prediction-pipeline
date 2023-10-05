@@ -1,25 +1,31 @@
 from tensorflow.keras.models import load_model
 import numpy as np
 import pandas as pd
+import json
 
-def predict_odds(odds_path, model_path, prediction_path):
+
+def predict_odds(model_path, **kwargs):
     """
     Generates predicted odds for each matchup in the DataFrame using a model.
     For this example, we'll load a dummy model from an .h5 file.
     """
 
-    df = pd.read_csv(odds_path)
+    # Pull the odds DataFrame JSON from XCom
+    ti = kwargs['ti']
+    grouped_df_json = ti.xcom_pull(task_ids='get_odds', key='grouped_df')
+
+    print(grouped_df_json)
+
+    # Convert the JSON string back to a DataFrame
+    df = pd.read_json(grouped_df_json, orient='split')
 
     # Load the saved model
     model = load_model(model_path)
 
     # Generate random features for prediction (since the model is a dummy)
-    # Ensuring that each row has a different random feature
     random_features = np.random.rand(df.shape[0], 1)
 
-    print("Random features: ", random_features)
     # Get raw predicted odds from the model
-    # This should output a 2D array (number of samples x 2)
     predicted_odds_raw = model.predict(random_features)
 
     # Normalize the odds so they sum up to 100 for each match
@@ -31,4 +37,6 @@ def predict_odds(odds_path, model_path, prediction_path):
     df['home_team_predicted_odds'] = normalized_odds_home
     df['away_team_predicted_odds'] = normalized_odds_away
 
-    df.to_csv(prediction_path, index=False)
+    # Convert DataFrame to JSON and push to XCom for subsequent tasks
+    predictions_json = df.to_json(orient="split")
+    ti.xcom_push(key='predictions', value=predictions_json)

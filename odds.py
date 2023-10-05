@@ -3,7 +3,7 @@ import pandas as pd
 import requests
 
 
-def get_odds(sport, regions, bookmakers, odds_format, csv_save_path, **kwargs):
+def get_odds(sport, regions, bookmakers, odds_format, **kwargs):
     '''
     Pull latest odds from The Odds API,
     by default this pulls h2h odds assuming that it's Tuesday
@@ -64,4 +64,10 @@ def get_odds(sport, regions, bookmakers, odds_format, csv_save_path, **kwargs):
     grouped_df = odds_df.groupby(['commence_time', 'home_team', 'away_team']).apply(
         aggregate_rows).reset_index(drop=True)
 
-    grouped_df.to_csv(csv_save_path, index=False)
+    # Convert DataFrame to JSON format
+    grouped_df_json = grouped_df.to_json(date_format='iso', orient='split')
+
+    print(grouped_df_json)
+    # Push the JSON to XCom
+    ti = kwargs['ti']
+    ti.xcom_push(key='grouped_df', value=grouped_df_json)

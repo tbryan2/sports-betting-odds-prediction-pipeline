@@ -1,20 +1,23 @@
 import emails
 import pandas as pd
-from airflow.models import Variable
 
-def send_email(prediction_path, body, subject, mail_from, mail_to, **kwargs):
+def send_email(body, subject, mail_from, mail_to, **kwargs):
     '''
     Send an email using SES
     '''
     # Pull secrets from XCom
-    secrets = kwargs['ti'].xcom_pull(task_ids='get_secrets')
-    
+    ti = kwargs['ti']
+    secrets = ti.xcom_pull(task_ids='get_secrets')
+
     host = secrets.get("SES_HOST_ADDRESS")
     user = secrets.get("SES_USER_ID")
     password = secrets.get("SES_PASSWORD")
 
-    # Read the predictions into a DataFrame
-    df_predictions = pd.read_csv(prediction_path)
+    # Pull the predictions JSON from XCom
+    predictions_json = ti.xcom_pull(task_ids='predict_odds', key='predictions')
+
+    # Convert the JSON string back to a DataFrame
+    df_predictions = pd.read_json(predictions_json, orient='split')
 
     # Convert the DataFrame to an HTML table
     predictions_table = df_predictions.to_html(index=False)
