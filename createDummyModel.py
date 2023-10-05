@@ -13,3 +13,4 @@ model.compile(optimizer='adam', loss='mse')
 
 # Save the model
 model.save('models/dummy_model.h5')
+ 
