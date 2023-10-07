@@ -28,3 +28,6 @@ jobs:
 
       - name: Upload Dockerfile to S3
         run: aws s3 cp Dockerfile s3://sportsbettingoddspredictionpipeline/build/Dockerfile
+
+      - name: Upload entrypoint.sh to S3
+        run: aws s3 cp entrypoint.sh s3://sportsbettingoddspredictionpipeline/build/entrypoint.sh
