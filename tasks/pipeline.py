@@ -13,7 +13,7 @@ with DAG("h2h_pipeline",
     start_date=datetime(2023, 9, 29),
     schedule_interval="@daily",
     catchup=False,
-         is_paused_upon_creation=False) as dag:
+    is_paused_upon_creation=False) as dag:
 
     t0a = PythonOperator(
         task_id='get_secrets',
