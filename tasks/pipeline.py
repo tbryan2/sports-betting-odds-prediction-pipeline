@@ -38,7 +38,7 @@ with DAG("h2h_pipeline",
         op_kwargs={
             "bucket_name": "sportsbettingoddspredictionpipeline",
             "model_key": "models/dummy_model.h5",
-            "local_model_path": "tmp/models/dummy_model.h5"
+            "local_model_path": "/tmp/dummy_model.h5"
         }
     )
 
@@ -46,7 +46,7 @@ with DAG("h2h_pipeline",
         task_id="predict_odds",
         python_callable=predict_odds,
         op_kwargs={
-            "model_path" : "tmp/models/dummy_model.h5",
+            "model_path" : "/tmp/dummy_model.h5",
         }
     )
 

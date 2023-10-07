@@ -19,9 +19,6 @@ def download_model_from_s3(bucket_name, model_key, local_model_path):
     """
     Create a directory called 'models/' and download a model file from an S3 bucket into it.
     """
-    # Create 'models/' directory if it does not exist
-    if not os.path.exists('/tmp/models'):
-        os.makedirs('/tmp/models/')
 
     load_dotenv()
     aws_access_key_id = os.getenv("AWS_ACCESS_KEY_ID")
@@ -31,8 +28,7 @@ def download_model_from_s3(bucket_name, model_key, local_model_path):
     if is_running_on_ec2():
         s3 = boto3.client('s3')
     else:
-        s3 = boto3.client('s3', aws_access_key_id=aws_access_key_id,
-                          aws_secret_access_key=aws_secret_access_key)
+        s3 = boto3.client('s3', aws_access_key_id=aws_access_key_id, aws_secret_access_key=aws_secret_access_key)
 
     try:
         # Download the model file from S3 to the local 'models/' directory
@@ -45,3 +41,6 @@ def download_model_from_s3(bucket_name, model_key, local_model_path):
         print("Incomplete credentials provided.")
     except Exception as e:
         print(f"An error occurred: {e}")
+
+    print(f"Downloaded model should exist at: {local_model_path}")
+    print(f"Does it actually exist? {os.path.exists(local_model_path)}")
