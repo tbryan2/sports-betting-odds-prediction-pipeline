@@ -1,4 +1,4 @@
-name: Upload to S3
+name: Upload to S3 and Push to ECR
 
 on:
   push:
@@ -31,3 +31,14 @@ jobs:
 
       - name: Upload entrypoint.sh to S3
         run: aws s3 cp entrypoint.sh s3://sportsbettingoddspredictionpipeline/build/entrypoint.sh
+
+      # Login to Amazon ECR
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      # Build and Push Docker Image
+      - name: Build and Push Docker image
+        run: |
+          docker build -t ${{ secrets.ECR_REPOSITORY }}:${{ github.sha }} .
+          docker push ${{ secrets.ECR_REPOSITORY }}:${{ github.sha }}
