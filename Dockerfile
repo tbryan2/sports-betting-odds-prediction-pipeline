@@ -5,7 +5,7 @@ FROM apache/airflow:2.1.2
 USER root
 
 # Install dependencies (add more as needed)
-RUN pip install --no-cache-dir boto3 pandas requests emails python-dotenv
+RUN pip install --no-cache-dir airflow boto3 pandas requests emails python-dotenv
 
 # Install unzip and AWS CLI
 RUN apt-get update && apt-get install -y unzip awscli
