@@ -14,11 +14,16 @@ class SecretsManager:
     '''
 
     def __init__(self):
-        load_dotenv()
         self.secret_name = "SportsBettingOddsPredictionPipelineSecrets"
         self.region_name = "us-east-1"
-        self.aws_access_key_id = os.getenv("AWS_ACCESS_KEY_ID")
-        self.aws_secret_access_key = os.getenv("AWS_SECRET_ACCESS_KEY")
+
+        if not self.is_running_on_ec2():
+            load_dotenv()
+            self.aws_access_key_id = os.getenv("AWS_ACCESS_KEY_ID")
+            self.aws_secret_access_key = os.getenv("AWS_SECRET_ACCESS_KEY")
+        else:
+            self.aws_access_key_id = None
+            self.aws_secret_access_key = None
 
     def is_running_on_ec2(self):
         '''
