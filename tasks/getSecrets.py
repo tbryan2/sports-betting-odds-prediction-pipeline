@@ -24,16 +24,14 @@ class SecretsManager:
         '''
         Are we running on EC2?
         '''
-        # Check if AWS_DEFAULT_REGION environment variable is set
-        if os.environ.get("AWS_DEFAULT_REGION"):
-            return True
 
         # Check if the username is 'ec2-user'
         my_user = os.environ.get("USER")
-        if "ec2-user" in my_user:
+        if my_user == 'ec2-user':
             return True
-
-        return False
+        
+        else:
+            return False
 
     def get_client(self):
         '''

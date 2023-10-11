@@ -4,21 +4,18 @@ import requests
 from botocore.exceptions import NoCredentialsError, PartialCredentialsError
 from dotenv import load_dotenv
 
+def is_running_on_ec2(self):
+    '''
+    Are we running on EC2?
+    '''
 
-def is_running_on_ec2():
-    """
-    Are we running on an EC2 instance?
-    """
-    # Check if AWS_DEFAULT_REGION environment variable is set
-    if os.environ.get("AWS_DEFAULT_REGION"):
-        return True
-    
     # Check if the username is 'ec2-user'
     my_user = os.environ.get("USER")
-    if "ec2-user" in my_user:
+    if my_user == 'ec2-user':
         return True
 
-    return False
+    else:
+        return False
 
 def download_model_from_s3(bucket_name, model_key, local_model_path):
     """
