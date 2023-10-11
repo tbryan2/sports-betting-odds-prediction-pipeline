@@ -12,6 +12,7 @@ class SecretsManager:
     from AWS Secrets Manager, using access keys if local and
     forgoing them if running on EC2.
     '''
+
     def __init__(self):
         load_dotenv()
         self.secret_name = "SportsBettingOddsPredictionPipelineSecrets"
@@ -23,12 +24,16 @@ class SecretsManager:
         '''
         Are we running on EC2?
         '''
-        try:
-            response = requests.get(
-                'http://169.254.169.254/latest/meta-data/instance-id', timeout=1)
+        # Check if AWS_DEFAULT_REGION environment variable is set
+        if os.environ.get("AWS_DEFAULT_REGION"):
             return True
-        except requests.exceptions.RequestException:
-            return False
+
+        # Check if the username is 'ec2-user'
+        my_user = os.environ.get("USER")
+        if "ec2-user" in my_user:
+            return True
+
+        return False
 
     def get_client(self):
         '''
@@ -65,5 +70,5 @@ class SecretsManager:
         # Push to XCom if task_instance is available in kwargs
         if 'ti' in kwargs:
             kwargs['ti'].xcom_push(key='secrets', value=secret_dict)
-        
+
         return secret_dict
