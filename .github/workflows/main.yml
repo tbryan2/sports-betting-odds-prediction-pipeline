@@ -41,4 +41,6 @@ jobs:
       - name: Build and Push Docker image
         run: |
           docker build -t ${{ secrets.ECR_REPOSITORY }}:${{ github.sha }} .
+          docker tag ${{ secrets.ECR_REPOSITORY }}:${{ github.sha }} ${{ secrets.ECR_REPOSITORY }}:latest
           docker push ${{ secrets.ECR_REPOSITORY }}:${{ github.sha }}
+          docker push ${{ secrets.ECR_REPOSITORY }}:latest
