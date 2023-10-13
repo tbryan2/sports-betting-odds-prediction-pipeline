@@ -25,18 +25,17 @@ class SecretsManager:
             self.aws_access_key_id = None
             self.aws_secret_access_key = None
 
-    def is_running_on_ec2(self):
-        '''
-        Are we running on EC2?
-        '''
 
-        # Check if the username is 'ec2-user'
-        my_user = os.environ.get("USER")
-        if my_user == 'ec2-user':
-            return True
-        
-        else:
-            return False
+    def is_running_on_ec2(self):
+        try:
+            # Try to request instance identity document
+            response = requests.get('http://169.254.169.254/latest/dynamic/instance-identity/document', timeout=1)
+            if response.status_code == 200:
+                return True
+        except requests.exceptions.RequestException:
+            pass
+        return False
+
 
     def get_client(self):
         '''

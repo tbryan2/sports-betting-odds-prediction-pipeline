@@ -5,17 +5,15 @@ from botocore.exceptions import NoCredentialsError, PartialCredentialsError
 from dotenv import load_dotenv
 
 def is_running_on_ec2():
-    '''
-    Are we running on EC2?
-    '''
+    try:
+        # Try to request instance identity document
+        response = requests.get('http://169.254.169.254/latest/dynamic/instance-identity/document', timeout=1)
+        if response.status_code == 200:
+            return True
+    except requests.exceptions.RequestException:
+        pass
+    return False
 
-    # Check if the username is 'ec2-user'
-    my_user = os.environ.get("USER")
-    if my_user == 'ec2-user':
-        return True
-
-    else:
-        return False
 
 def download_model_from_s3(bucket_name, model_key, local_model_path):
     """
